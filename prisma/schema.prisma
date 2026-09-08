@@ -1,0 +1,71 @@
+// Blisscamp India — database schema
+// Dev uses SQLite for zero-setup. Swap "provider" to "postgresql" (and update
+// DATABASE_URL) before deploying to production — see README.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Trek {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  region      String
+  difficulty  String // Easy | Moderate | Challenging | Demanding
+  durationDays Int
+  maxAltitudeM Int
+  pricePerPersonPaise Int // price in the smallest currency unit (paise for INR)
+  groupSizeMax Int
+  summary     String
+  description String
+  highlights  String // JSON string array
+  inclusions  String // JSON string array
+  exclusions  String // JSON string array
+  itinerary   String // JSON array of { day, title, description, elevationM }
+  images      String // JSON string array of image URLs
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  departures Departure[]
+  bookings   Booking[]
+}
+
+model Departure {
+  id        String   @id @default(cuid())
+  trekId    String
+  trek      Trek     @relation(fields: [trekId], references: [id], onDelete: Cascade)
+  date      DateTime
+  capacity  Int
+  booked    Int      @default(0)
+  createdAt DateTime @default(now())
+
+  bookings Booking[]
+
+  @@index([trekId, date])
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  trekId          String
+  trek            Trek     @relation(fields: [trekId], references: [id])
+  departureId     String
+  departure       Departure @relation(fields: [departureId], references: [id])
+  travelers       Int
+  name            String
+  email           String
+  phone           String
+  amountPaise     Int
+  currency        String   @default("inr")
+  status          String   @default("pending") // pending | confirmed | cancelled
+  stripeSessionId String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+}
