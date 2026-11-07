@@ -118,9 +118,9 @@ export default async function HomePage() {
       {/* Upcoming departures */}
       <section id="departures" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-16 sm:px-6">
         <h2 className="font-display text-3xl text-spruce">Upcoming departures</h2>
-        <p className="mt-2 text-sm text-ink/70">Live seat counts — batches close when they fill.</p>
+        <p className="mt-2 text-sm text-ink/70">Fixed batch dates — tap one to see the trek and book.</p>
         <div className="mt-8 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
-          {departures.map((d) => (
+          {departures.filter((d) => d.seatsLeft > 0).map((d) => (
             <Link
               key={d.id}
               href={`/treks/${d.trek.slug}#book`}
@@ -136,17 +136,7 @@ export default async function HomePage() {
               <span className="hidden text-sm text-spruce sm:block">
                 {formatMoney(d.trek.pricePerPersonPaise)}
               </span>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  d.seatsLeft === 0
-                    ? "bg-ink/10 text-ink/50"
-                    : d.seatsLeft <= 4
-                      ? "bg-red-100 text-red-800"
-                      : "bg-emerald-100 text-emerald-800"
-                }`}
-              >
-                {d.seatsLeft === 0 ? "Full" : `${d.seatsLeft} seats left`}
-              </span>
+              <span className="text-xs font-medium text-glacier-dark">View →</span>
             </Link>
           ))}
         </div>

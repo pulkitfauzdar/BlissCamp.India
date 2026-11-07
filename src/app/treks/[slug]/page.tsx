@@ -59,11 +59,13 @@ export default async function TrekDetailPage({
   const trek = await getTrekBySlug(params.slug);
   if (!trek) notFound();
 
-  const [departures, all, nextDeparture] = await Promise.all([
+  const [allDepartures, all, nextDeparture] = await Promise.all([
     getUpcomingDepartures(trek.id),
     getAllTreks(),
     getNextDepartureByTrek(),
   ]);
+  // Full batches are hidden rather than shown as "Full".
+  const departures = allDepartures.filter((d) => d.seatsLeft > 0);
   const related = all
     .filter((t) => t.id !== trek.id)
     .sort(
@@ -305,28 +307,15 @@ export default async function TrekDetailPage({
                 {departures.map((d) => (
                   <li key={d.id}>
                     <a
-                      href={d.seatsLeft > 0 ? bookBatchOnWhatsapp(d.date) : undefined}
+                      href={bookBatchOnWhatsapp(d.date)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-disabled={d.seatsLeft === 0}
-                      className={`flex items-center justify-between py-2.5 ${
-                        d.seatsLeft > 0 ? "group hover:text-spruce" : "cursor-not-allowed opacity-60"
-                      }`}
+                      className="group flex items-center justify-between py-2.5 hover:text-spruce"
                     >
-                    <span className="text-ink/80 group-hover:text-spruce group-hover:underline">
-                      {batchDate.format(new Date(d.date))}
-                    </span>
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        d.seatsLeft === 0
-                          ? "bg-ink/10 text-ink/50"
-                          : d.seatsLeft <= 4
-                            ? "bg-red-100 text-red-800"
-                            : "bg-emerald-100 text-emerald-800"
-                      }`}
-                    >
-                      {d.seatsLeft === 0 ? "Full" : `${d.seatsLeft} seats left`}
-                    </span>
+                      <span className="text-ink/80 group-hover:text-spruce group-hover:underline">
+                        {batchDate.format(new Date(d.date))}
+                      </span>
+                      <span className="text-xs font-medium text-[#1a9e4b]">Book →</span>
                     </a>
                   </li>
                 ))}

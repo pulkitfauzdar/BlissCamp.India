@@ -124,12 +124,12 @@ export const howItWorks = [
   {
     step: "1",
     title: "Pick a trek and date",
-    body: "Filter by season, month or difficulty, and check live seats left on every batch.",
+    body: "Browse our treks by season or difficulty and choose a batch date that suits you.",
   },
   {
     step: "2",
-    title: "Book and pay online",
-    body: "Secure checkout holds your seats the moment payment goes through.",
+    title: "Book on WhatsApp",
+    body: "Message us the trek and date — we confirm your seat and share the payment details.",
   },
   {
     step: "3",

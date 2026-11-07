@@ -50,8 +50,8 @@ const reasons: Reason[] = [
     icon: icons.pulse,
   },
   {
-    title: "Real-time seat availability",
-    body: "Departure dates show live seats left, so you're never booking into a trip that's secretly already full.",
+    title: "Fixed batch dates",
+    body: "Every trek runs on published batch dates, so you can plan your leave and travel well in advance.",
     icon: icons.seat,
   },
   {
