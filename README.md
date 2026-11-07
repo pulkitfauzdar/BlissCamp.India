@@ -32,9 +32,6 @@ real bookings, you'll still want:
   Postmark in `src/app/api/webhook/route.ts`.
 - **Refunds and cancellations.** Not built. You'd handle these from the
   Stripe Dashboard directly to start.
-- **A production database.** SQLite is great for local development but
-  doesn't work on serverless hosts like Vercel. See "Going to production"
-  below.
 
 ## Local setup
 
@@ -102,20 +99,44 @@ different image host.
 
 ## Going to production
 
-1. **Swap SQLite for a real database.** In `prisma/schema.prisma`, change
-   `provider = "sqlite"` to `provider = "postgresql"` (or `mysql`), and
-   point `DATABASE_URL` at a hosted database — Neon, Supabase, and Railway
-   all have generous free tiers that work well with Vercel. Run
-   `npm run db:push && npm run db:seed` against it once.
-2. **Deploy.** This is a standard Next.js app — the easiest path is
-   [Vercel](https://vercel.com/new): connect the repo, add the environment
-   variables from `.env.example` in the project settings, and deploy. Any
-   Node.js host works too (`npm run build && npm run start`).
-3. **Set `NEXT_PUBLIC_SITE_URL`** to your real domain — it's used to build
-   the Stripe success/cancel redirect URLs.
-4. **Add the production webhook** in Stripe as described above, and use its
-   signing secret for `STRIPE_WEBHOOK_SECRET` in your production
-   environment variables.
+The live site runs on **[Render](https://render.com)** (hosting) with a
+**[Supabase](https://supabase.com)** Postgres database:
+<https://blisscamp-india.onrender.com>.
+
+1. **Database (Supabase).** `prisma/schema.prisma` uses Postgres.
+   `DATABASE_URL` is Supabase's pooled connection (port 6543, with
+   `?pgbouncer=true`) and `DIRECT_URL` is the direct connection (port 5432),
+   used only by `db push`. If the database password contains special
+   characters such as `@`, URL-encode them (`@` → `%40`). To create the
+   tables and load the treks, run once against Supabase:
+   ```bash
+   npm run db:push && npm run db:seed
+   ```
+2. **Deploy (Render).** Create a **Web Service** from this GitHub repo:
+   - Runtime: **Node** · Branch: **main** · Region: **Singapore** (same as
+     the Supabase database)
+   - Build command: `npm install && npm run build`
+   - Start command: `npm start`
+   - Instance type: **Free**
+   - Environment variables: `DATABASE_URL`, `DIRECT_URL`,
+     `NEXT_PUBLIC_SITE_URL` (`https://blisscamp-india.onrender.com`) and
+     `NEXT_PUBLIC_CURRENCY` (`inr`)
+   - Turn **Auto-Deploy** on (Settings → Build & Deploy) so every push to
+     `main` redeploys. Otherwise use **Manual Deploy → Deploy latest commit**.
+3. **Free-plan notes.**
+   - Render's free instance sleeps after 15 minutes without visitors; the
+     next visit takes 30–60 seconds to wake it. The paid Starter instance
+     removes this.
+   - Next.js's image optimizer runs out of resources on the free instance,
+     so `next.config.mjs` sets `images.unoptimized: true` and photos load
+     straight from Unsplash.
+   - Supabase pauses free projects after a week without activity. If the
+     live site shows a database error, restore the project from the
+     Supabase dashboard.
+4. **Online payments (optional).** Bookings currently go through WhatsApp.
+   To turn Stripe checkout back on, add the Stripe keys to Render's
+   environment variables and set up the production webhook as described in
+   "Setting up Stripe" above.
 
 ## Project structure
 
