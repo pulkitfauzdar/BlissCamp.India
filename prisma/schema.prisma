@@ -1,14 +1,16 @@
 // Blisscamp India — database schema
-// Dev uses SQLite for zero-setup. Swap "provider" to "postgresql" (and update
-// DATABASE_URL) before deploying to production — see README.md.
+// Running on Supabase Postgres. DATABASE_URL is the pooled connection (used
+// by the app), DIRECT_URL is the direct connection (used only for
+// migrations/db push) — see README.md.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Trek {
@@ -29,6 +31,17 @@ model Trek {
   itinerary   String // JSON array of { day, title, description, elevationM }
   images      String // JSON string array of image URLs
   featured    Boolean  @default(false)
+  badge       String? // short label on the card, e.g. "Bestseller"
+  seasons     String   @default("[]") // JSON array: Winter | Spring | Summer | Monsoon | Autumn
+  bestMonths  String   @default("[]") // JSON array of month numbers, 1-12
+  themes      String   @default("[]") // JSON array, e.g. "Snow", "Beginner", "Summit a peak"
+  startPoint  String   @default("")   // base camp / pickup, e.g. "Sankri (from Dehradun)"
+  distanceKm  Int      @default(0)
+  fitness     String   @default("")   // what fitness this trek needs
+  howToReach  String   @default("")
+  faqs        String   @default("[]") // JSON array of { q, a }
+  lat         Float    @default(0) // map pin: summit or main highlight
+  lng         Float    @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

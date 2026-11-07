@@ -3,7 +3,7 @@ import type { ItineraryDay } from "@/types";
 export default function ElevationProfile({ itinerary }: { itinerary: ItineraryDay[] }) {
   const width = 640;
   const height = 160;
-  const padding = { top: 16, right: 16, bottom: 28, left: 44 };
+  const padding = { top: 28, right: 28, bottom: 28, left: 36 };
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
 

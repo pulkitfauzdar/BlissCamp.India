@@ -90,7 +90,7 @@ export default function BookingWidget({
 
   if (departures.length === 0) {
     return (
-      <div className="border border-line bg-stone-paper p-6">
+      <div className="rounded-2xl border border-line bg-white p-6">
         <p className="font-display text-lg text-spruce">No open departures right now</p>
         <p className="mt-2 text-sm text-ink/70">
           {trekTitle} isn&apos;t scheduled for the next few months. Write to us and
@@ -103,7 +103,7 @@ export default function BookingWidget({
   return (
     <form
       onSubmit={handleSubmit}
-      className="border border-line bg-stone-paper p-6"
+      className="rounded-2xl border border-line bg-white p-6"
       aria-label={`Book ${trekTitle}`}
     >
       <p className="font-display text-lg text-spruce">Book this trek</p>
@@ -115,7 +115,7 @@ export default function BookingWidget({
         {departures.map((d) => (
           <label
             key={d.id}
-            className={`flex cursor-pointer items-center justify-between border px-3 py-2 text-sm transition-colors ${
+            className={`flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm transition-colors ${
               departureId === d.id
                 ? "border-spruce bg-spruce/5"
                 : "border-line hover:border-spruce/40"
@@ -154,7 +154,7 @@ export default function BookingWidget({
         onChange={(e) =>
           setTravelers(Math.max(1, Math.min(maxTravelers || 1, Number(e.target.value))))
         }
-        className="mt-2 w-24 border border-line bg-white px-3 py-2 text-sm"
+        className="mt-2 w-24 rounded-lg border border-line bg-white px-3 py-2 text-sm"
       />
 
       <div className="mt-5 grid gap-3">
@@ -167,7 +167,7 @@ export default function BookingWidget({
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-2 w-full border border-line bg-white px-3 py-2 text-sm"
+            className="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm"
             placeholder="As on your ID"
           />
         </div>
@@ -180,7 +180,7 @@ export default function BookingWidget({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 w-full border border-line bg-white px-3 py-2 text-sm"
+            className="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm"
             placeholder="you@example.com"
           />
         </div>
@@ -193,7 +193,7 @@ export default function BookingWidget({
             required
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="mt-2 w-full border border-line bg-white px-3 py-2 text-sm"
+            className="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm"
             placeholder="+91 98765 43210"
           />
         </div>
@@ -211,7 +211,7 @@ export default function BookingWidget({
       <button
         type="submit"
         disabled={loading || maxTravelers === 0}
-        className="mt-5 w-full bg-amber px-4 py-3 text-sm font-medium text-spruce-dark transition-colors hover:bg-amber-dark disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 w-full rounded-full bg-amber px-4 py-3 text-sm font-medium text-spruce-dark transition-colors hover:bg-amber-dark disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Redirecting to payment…" : "Continue to payment"}
       </button>

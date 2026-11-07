@@ -1,70 +1,85 @@
 import Link from "next/link";
 import TrekCard from "@/components/TrekCard";
-import { getAllTreks } from "@/lib/treks";
+import HeroSlider from "@/components/HeroSlider";
+import TrekMap from "@/components/TrekMap";
+import { filterTreks, getAllTreks, getNextDepartureByTrek, toMapTreks } from "@/lib/treks";
+import type { TrekFilters } from "@/types";
 
 export const metadata = { title: "All treks — Blisscamp India" };
+export const dynamic = "force-dynamic";
 
-function matchesDuration(days: number, bucket: string): boolean {
-    const [min, max] = bucket.split("-").map(Number);
-    if (Number.isNaN(min) || Number.isNaN(max)) return true;
-    return days >= min && days <= max;
-}
+const filterKeys = ["q", "season", "month", "difficulty", "region", "theme"] as const;
 
 export default async function TreksPage({
-                                            searchParams,
-                                        }: {
-    searchParams: { difficulty?: string; region?: string; duration?: string };
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
 }) {
-    const allTreks = await getAllTreks();
-    const { difficulty, region, duration } = searchParams;
+  const filters: TrekFilters = {};
+  for (const key of filterKeys) {
+    const v = searchParams[key];
+    if (typeof v === "string" && v) filters[key] = v;
+  }
 
-    const treks = allTreks.filter((t) => {
-        if (difficulty && t.difficulty !== difficulty) return false;
-        if (region && t.region !== region) return false;
-        if (duration && !matchesDuration(t.durationDays, duration)) return false;
-        return true;
-    });
+  const [all, nextDeparture] = await Promise.all([getAllTreks(), getNextDepartureByTrek()]);
+  const treks = filterTreks(all, filters);
+  const active = filterKeys.filter((k) => filters[k]);
 
-    const activeFilters = [
-        difficulty && { key: "difficulty", label: difficulty },
-        region && { key: "region", label: region },
-        duration && { key: "duration", label: `${duration.replace("-", "–")} days` },
-    ].filter(Boolean) as { key: string; label: string }[];
+  return (
+    <div>
+      <h1 className="sr-only">All treks</h1>
+      <HeroSlider
+        heightClass="h-[60vh] min-h-[420px] max-h-[600px]"
+        slides={all.map((t) => ({
+          image: t.images[0],
+          alt: t.title,
+          eyebrow: `${t.durationDays} days · ${t.difficulty} · ${t.region.split(",")[0]}`,
+          title: t.title,
+          text: t.summary,
+          cta: { label: "View trek", href: `/treks/${t.slug}` },
+        }))}
+      />
 
-    return (
-        <div className="mx-auto max-w-6xl px-6 py-16">
-            <p className="text-xs font-medium uppercase tracking-wide text-glacier-dark">
-                {treks.length} of {allTreks.length} treks
-            </p>
-            <h1 className="mt-2 font-display text-4xl text-spruce">Find your next trek</h1>
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <section className="mt-10" aria-labelledby="map-heading">
+          <h2 id="map-heading" className="font-display text-2xl text-spruce">Trek map</h2>
+          <p className="mt-1 text-sm text-ink/70">Tap a pin to see the trek.</p>
+          <div className="mt-4">
+            <TrekMap treks={toMapTreks(all)} />
+          </div>
+        </section>
 
-            {activeFilters.length > 0 && (
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                    {activeFilters.map((f) => (
-                        <span
-                            key={f.key}
-                            className="border border-line bg-stone-paper px-3 py-1 text-xs text-ink/70"
-                        >
-              {f.label}
-            </span>
-                    ))}
-                    <Link href="/treks" className="text-xs font-medium text-glacier-dark hover:text-spruce">
-                        Clear filters
-                    </Link>
-                </div>
-            )}
-
-            {treks.length === 0 ? (
-                <p className="mt-10 text-sm text-ink/70">
-                    No treks match that filter right now. <Link href="/treks" className="underline">See all treks</Link>.
-                </p>
-            ) : (
-                <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {treks.map((trek) => (
-                        <TrekCard key={trek.id} trek={trek} />
-                    ))}
-                </div>
-            )}
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+          <p className="text-sm text-ink/70">
+            <span className="font-medium text-spruce">{treks.length}</span>{" "}
+            {treks.length === 1 ? "trek" : "treks"} found
+          </p>
+          {active.length > 0 && (
+            <Link href="/treks" className="text-sm font-medium text-glacier-dark hover:text-spruce">
+              Clear all filters
+            </Link>
+          )}
         </div>
-    );
+
+        {treks.length > 0 ? (
+          <div className="mt-8 grid gap-6 pb-16 sm:grid-cols-2 lg:grid-cols-3">
+            {treks.map((trek) => (
+              <TrekCard key={trek.id} trek={trek} nextDeparture={nextDeparture[trek.id]} />
+            ))}
+          </div>
+        ) : (
+          <div className="my-16 rounded-2xl border border-dashed border-line p-10 text-center">
+            <p className="font-display text-xl text-spruce">No treks match those filters</p>
+            <p className="mt-2 text-sm text-ink/70">
+              Try a different month or season, or{" "}
+              <Link href="/treks" className="font-medium text-glacier-dark underline">
+                see all treks
+              </Link>
+              .
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
