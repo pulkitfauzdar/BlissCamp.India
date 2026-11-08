@@ -138,6 +138,28 @@ The live site runs on **[Render](https://render.com)** (hosting) with a
    environment variables and set up the production webhook as described in
    "Setting up Stripe" above.
 
+### Alternative: Oracle Cloud Always Free
+
+Oracle's free Ampere VM (up to 4 CPUs and 24 GB of memory) never sleeps and
+allows commercial use. `deploy/oracle/` holds the scripts.
+
+1. Create a VM: **Compute → Instances → Create instance**, image
+   **Ubuntu 22.04 or 24.04**, shape **VM.Standard.A1.Flex** (e.g. 2 OCPU,
+   12 GB). If A1 says "out of capacity", try another availability domain or
+   use **VM.Standard.E2.1.Micro**. Save the SSH key it offers.
+2. Open the ports: on the instance's subnet, **Security List → Add Ingress
+   Rules**, source `0.0.0.0/0`, TCP, destination ports `80,443`.
+3. SSH in (`ssh -i <key> ubuntu@<public-ip>`) and run:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/pulkitfauzdar/BlissCamp.India/main/deploy/oracle/setup.sh | bash
+   ```
+   It asks for `DATABASE_URL` and `DIRECT_URL`, builds the site, keeps it
+   running with PM2 and serves it over HTTPS with Caddy at
+   `https://<ip-with-dashes>.sslip.io`. To use your own domain, point its A
+   record at the IP and run the script with `DOMAIN=yourdomain.com` in front
+   of `bash`.
+4. To deploy new commits: `bash ~/blisscamp-india/deploy/oracle/update.sh`.
+
 ## Project structure
 
 ```
