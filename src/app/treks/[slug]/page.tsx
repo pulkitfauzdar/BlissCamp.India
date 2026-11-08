@@ -16,7 +16,15 @@ import BmiCalculator from "@/components/BmiCalculator";
 import FaqList from "@/components/FaqList";
 import TrekCard from "@/components/TrekCard";
 
-export const dynamic = "force-dynamic";
+// Rebuilt at most every 5 minutes instead of on every visit, so the small
+// Render instance serves cached HTML and rarely touches the database.
+export const revalidate = 300;
+
+// Lets Next cache trek pages; new treks added later are built on first visit.
+export async function generateStaticParams() {
+  const treks = await getAllTreks();
+  return treks.map((t) => ({ slug: t.slug }));
+}
 
 export async function generateMetadata({
   params,

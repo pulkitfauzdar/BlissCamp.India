@@ -21,7 +21,9 @@ import {
   trekCategories,
 } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
+// Rebuilt at most every 5 minutes instead of on every visit, so the small
+// Render instance serves cached HTML and rarely touches the database.
+export const revalidate = 300;
 
 const departureDate = new Intl.DateTimeFormat("en-IN", {
   weekday: "short",
